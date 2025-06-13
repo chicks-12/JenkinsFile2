@@ -1,25 +1,30 @@
+flag=true
+
 pipeline {
     agent any
-
-    tools {
-        maven 'Maven'  // The name must match the Maven tool name configured in Jenkins Global Tools
+    parameters {
+        // These are types of parameters
+        choice(name: 'VERSION', choices: ['1.1.0', '1.2.0', '1.3.0'], description: 'Version to deploy on prod')
+        booleanParam(name: 'executeTests', defaultValue: true, description: 'Whether to execute tests')
     }
-
     environment {
-        // Variables defined here can be used in any stage
-        NEW_VERSION = '1.3.0'
+        // Variables defined here can be used by any stage
+        HEL_VERSION = '1.3.0'
     }
-
     stages {
         stage('build') {
             steps {
                 echo 'Building Project'
-
-                // Using environment variable
-                echo "Building version ${NEW_VERSION}"
-
-                // Run Maven command
-                sh 'mvn install'
+            }
+        }
+        stage('test') {
+            when {
+                expression {
+                    params.executeTests
+                }
+            }
+            steps {
+                echo 'Testing Project'
             }
         }
     }
